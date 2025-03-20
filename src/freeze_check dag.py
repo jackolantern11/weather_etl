@@ -4,6 +4,7 @@ import pendulum
 import pandas as pd
 from airflow.decorators import dag, task
 from weather_api.api_wrapper import Point, GridPoint
+from airflow.providers.discord.hooks.discord_webhook import DiscordWebhookHook
 
 
 # CONSTANTS
@@ -18,7 +19,7 @@ default_args: dict[str, any] = {
 }
 
 def send_discord_notification(msg: str) -> None:
-    pass
+    DiscordWebhookHook(http_conn_id='AIRFLOW_DISCORD_WEATHER_HOOK', message=msg).execute()
 
 
 def check_freezing_temps() -> None:
@@ -33,12 +34,12 @@ def check_freezing_temps() -> None:
     # Get min / max temperature
     min_temp: int = twelve_hr_forecast['temperature'].min()
     max_temp: int = twelve_hr_forecast['temperature'].max()
-    logging.info(f"{min_temp = } - {max_temp = }")
+    logging.info(f"{min_temp = } F - {max_temp = } F")
 
     # Determine if notification is required:
     if min_temp < MIN_TEMP:
         logging.info(f"Temperature Close to Freezing. Drip faucets!")
-        # send_discord_notification(f"Cold temperatures tonight. Drip Faucets!\n {min_temp = } F \n {max_temp = } F")
+        send_discord_notification(f"Cold temperatures tonight. Drip Faucets!\n {min_temp = } F \n {max_temp = } F")
 
     else:
         logging.info(f"Temperature Range Okay... Will Not Send Notification.")
