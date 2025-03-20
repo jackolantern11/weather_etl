@@ -48,7 +48,7 @@ def check_freezing_temps() -> None:
 @dag(
     start_date=datetime(2025, 3, 5, 14, 0, 0, tzinfo=pendulum.timezone("US/Central")),
     end_date=None,
-    schedule=None,
+    schedule='0 19 * * *',
     dag_id="freeze_check",
     dagrun_timeout=timedelta(minutes=15),
     catchup=False,
